@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
         log.warn("request URI:{} MethodArgumentNotValidException : {}", request.getRequestURI(), errorMessage, e);
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.BAD_REQUEST.value(),
                 "Validation failed: " + errorMessage
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNoPermission(NoPermissionException e, HttpServletRequest request) {
         log.warn("request URI:{} NoPermissionException : {}",request.getRequestURI(), e.getMessage(), e);
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.FORBIDDEN,
+                HttpStatus.FORBIDDEN.value(),
                 e.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
         log.warn("request URI:{} EntityNotFoundException : {}",request.getRequestURI() ,e.getMessage(), e);
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.NOT_FOUND,
+                HttpStatus.NOT_FOUND.value(),
                 e.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEntityAlreadyExistsException(EntityAlreadyExistsException e, HttpServletRequest request){
         log.warn("request URI:{} EntityAlreadyExistsException : {}",request.getRequestURI() ,e.getMessage(), e);
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.CONFLICT,
+                HttpStatus.CONFLICT.value(),
                 e.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         log.warn("request URI:{} Exception : {}", request.getRequestURI(), e.getMessage(), e);
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 e.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
