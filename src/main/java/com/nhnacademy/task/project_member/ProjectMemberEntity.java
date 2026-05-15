@@ -33,4 +33,10 @@ public class ProjectMemberEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
+
+    public ProjectMemberEntity(Long userId, ProjectMemberRole role, ProjectEntity projectEntity) {
+        this.userId = userId;
+        this.role = role;
+        this.projectEntity = projectEntity;
+    }
 }
