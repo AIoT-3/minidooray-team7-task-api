@@ -21,7 +21,7 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
 
-    public List<CommentResponseDto> getComments(Long taskEntityId) {
-        return commentRepository.findAllByTaskEntityId(taskEntityId);
-    }
+//    public List<CommentResponseDto> getComments(Long taskEntityId) {
+//        return commentRepository.findAllByTaskEntityId(taskEntityId);
+//    }
 }
