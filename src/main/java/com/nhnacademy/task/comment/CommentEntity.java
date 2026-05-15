@@ -1,14 +1,12 @@
 package com.nhnacademy.task.comment;
 
-import com.nhnacademy.task.member.MemberEntity;
-import com.nhnacademy.task.project.ProjectEntity;
+import com.nhnacademy.task.project_member.ProjectMemberEntity;
+import com.nhnacademy.task.task.TaskEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 /**
  * Comments
@@ -22,11 +20,16 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentEntity {
     @Id
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "task_id")
+    private TaskEntity taskEntity;
+
+    @ManyToOne(optional = false)
     @JoinColumn(name = "project_member_id")
-    private MemberEntity memberEntity;
+    private ProjectMemberEntity projectMemberEntity;
 
     @Column(name = "content")
     private String content;
