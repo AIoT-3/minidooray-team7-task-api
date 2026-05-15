@@ -6,5 +6,6 @@ package com.nhnacademy.task.comment.dto;
  * @author chosun-nhn12
  * @since 26. 5. 15.
  */
-public record CommentDto() {
+public record CommentDto(
+) {
 }
