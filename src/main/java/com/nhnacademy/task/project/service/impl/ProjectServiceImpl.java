@@ -4,9 +4,9 @@ import com.nhnacademy.task.common.exception.EntityNotFoundException;
 import com.nhnacademy.task.common.exception.NoPermissionException;
 import com.nhnacademy.task.project.ProjectEntity;
 import com.nhnacademy.task.project.ProjectState;
-import com.nhnacademy.task.project.dto.ProjectCreateRequestDto;
-import com.nhnacademy.task.project.dto.ProjectSimpleResponseDto;
-import com.nhnacademy.task.project.dto.ProjectUpdateRequestDto;
+import com.nhnacademy.task.project.dto.req.ProjectCreateRequest;
+import com.nhnacademy.task.project.dto.resp.ProjectSimpleResponse;
+import com.nhnacademy.task.project.dto.req.ProjectUpdateRequest;
 import com.nhnacademy.task.project.repository.ProjectRepository;
 import com.nhnacademy.task.project.service.ProjectService;
 import com.nhnacademy.task.project_member.ProjectMemberEntity;
@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,12 +27,9 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
 
     @Transactional
-    public void createProject(Long requestingUserId, ProjectCreateRequestDto projectCreateRequestDto){
-        String statusStr = projectCreateRequestDto.getStatus();
-        ProjectState projectState = ProjectState.valueOf(statusStr);
-
+    public void createProject(Long requestingUserId, ProjectCreateRequest projectCreateRequest){
         //프로젝트 생성
-        ProjectEntity projectEntity = new ProjectEntity(projectCreateRequestDto.getName(),projectState);
+        ProjectEntity projectEntity = new ProjectEntity(projectCreateRequest.name(), ProjectState.ACTIVE);
         ProjectEntity savedProject = projectRepository.save(projectEntity);
 
         //프로젝트 생성 요청자를 프로젝트 관리자로 즉시 등록
@@ -42,7 +38,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public ProjectSimpleResponseDto getProjectById(Long requestingUserId, Long projectId){
+    public ProjectSimpleResponse getProjectById(Long requestingUserId, Long projectId){
         //프로젝트 find
         Optional<ProjectEntity> projectById = projectRepository.findById(projectId);
         if(projectById.isEmpty()) {
@@ -61,15 +57,15 @@ public class ProjectServiceImpl implements ProjectService {
             );
         }
 
-        return new ProjectSimpleResponseDto(projectEntity.getId(),
+        return new ProjectSimpleResponse(projectEntity.getId(),
                 projectEntity.getName(),
                 projectEntity.getState().name(),
                 projectEntity.getCreatedAt());
     }
 
     @Transactional(readOnly = true)
-    public Page<ProjectSimpleResponseDto> getProjectsPageByUserId(Long requestingUserId, Pageable pageable){
-        Page<ProjectSimpleResponseDto> allByUserId = projectRepository.findAllByUserId(requestingUserId, pageable);
+    public Page<ProjectSimpleResponse> getProjectsPageByUserId(Long requestingUserId, Pageable pageable){
+        Page<ProjectSimpleResponse> allByUserId = projectRepository.findAllByUserId(requestingUserId, pageable);
 
         if(!allByUserId.isEmpty()){
             return allByUserId;
@@ -78,7 +74,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional
-    public void updateProject(Long requestingUserId, Long projectId, ProjectUpdateRequestDto projectUpdateRequestDto){
+    public void updateProject(Long requestingUserId, Long projectId, ProjectUpdateRequest projectUpdateRequest){
         //기존 프로젝트 find
         Optional<ProjectEntity> projectById = projectRepository.findById(projectId);
         if(projectById.isEmpty()) {
@@ -99,10 +95,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         //프로젝트 update
-        String status = projectUpdateRequestDto.getStatus();
+        String status = projectUpdateRequest.status();
         ProjectState projectState = ProjectState.valueOf(status);
         ProjectEntity updatedProject = new ProjectEntity(projectEntity.getId(),
-                projectUpdateRequestDto.getName(),
+                projectUpdateRequest.name(),
                 projectState,
                 projectEntity.getCreatedAt());
 
@@ -112,16 +108,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional
     public void deleteProject(Long requestingUserId, Long projectId){
-        //기존 프로젝트 find
-        Optional<ProjectEntity> projectById = projectRepository.findById(projectId);
-        if(projectById.isEmpty()) {
+        //프로젝트 존재 여부 확인
+        if(!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException(
                     String.format("id: project not found", projectId)
             );
         }
-        ProjectEntity projectEntity = projectById.get();
 
-        //요청자의 관리자 권한 확인
+        //요청 자가 해당 프로젝트의 관리자 인지 확인
         Optional<ProjectMemberEntity> projectMemberById = projectMemberRepository.findByProjectEntity_IdAndUserIdAndRole(
                 projectId, requestingUserId, ProjectMemberRole.ADMIN);
         if(projectMemberById.isEmpty()){

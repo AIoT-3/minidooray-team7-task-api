@@ -30,6 +30,9 @@ public class ProjectMemberEntity {
     @Column(name = "role")
     private ProjectMemberRole role;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
@@ -37,6 +40,14 @@ public class ProjectMemberEntity {
     public ProjectMemberEntity(Long userId, ProjectMemberRole role, ProjectEntity projectEntity) {
         this.userId = userId;
         this.role = role;
+        this.isDeleted = false;
+        this.projectEntity = projectEntity;
+    }
+
+    public ProjectMemberEntity(Long userId, ProjectMemberRole role, boolean isDeleted, ProjectEntity projectEntity) {
+        this.userId = userId;
+        this.role = role;
+        this.isDeleted = isDeleted;
         this.projectEntity = projectEntity;
     }
 }

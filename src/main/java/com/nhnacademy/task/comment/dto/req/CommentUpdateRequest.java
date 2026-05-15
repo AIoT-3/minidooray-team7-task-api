@@ -1,17 +1,10 @@
-package com.nhnacademy.task.comment.dto;
+package com.nhnacademy.task.comment.dto.req;
 
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
-/**
- * CommentUpdateRequest
- *
- * @author chosun-nhn12
- * @since 26. 5. 15.
- */
-public record CommentUpdateRequestDto(
+public record CommentUpdateRequest(
         @Length(max = 45)
         @NotBlank
         String content
-) {
-}
+) {}

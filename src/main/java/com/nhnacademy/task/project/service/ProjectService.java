@@ -1,8 +1,8 @@
 package com.nhnacademy.task.project.service;
 
-import com.nhnacademy.task.project.dto.ProjectCreateRequestDto;
-import com.nhnacademy.task.project.dto.ProjectSimpleResponseDto;
-import com.nhnacademy.task.project.dto.ProjectUpdateRequestDto;
+import com.nhnacademy.task.project.dto.req.ProjectCreateRequest;
+import com.nhnacademy.task.project.dto.resp.ProjectSimpleResponse;
+import com.nhnacademy.task.project.dto.req.ProjectUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,14 +14,14 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ProjectService {
     //create
-    void createProject(Long requestingUserId, ProjectCreateRequestDto projectCreateRequestDto);
+    void createProject(Long requestingUserId, ProjectCreateRequest projectCreateRequest);
 
     //read
-    ProjectSimpleResponseDto getProjectById(Long requestingUserId, Long projectId);
-    Page<ProjectSimpleResponseDto> getProjectsPageByUserId(Long requestingUserId, Pageable pageable);
+    ProjectSimpleResponse getProjectById(Long requestingUserId, Long projectId);
+    Page<ProjectSimpleResponse> getProjectsPageByUserId(Long requestingUserId, Pageable pageable);
 
     //update
-    void updateProject(Long requestingUserId, Long projectId, ProjectUpdateRequestDto projectUpdateRequestDto);
+    void updateProject(Long requestingUserId, Long projectId, ProjectUpdateRequest projectUpdateRequest);
 
     //delete
     void deleteProject(Long requestingUserId, Long projectId);

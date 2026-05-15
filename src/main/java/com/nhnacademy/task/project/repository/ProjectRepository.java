@@ -1,15 +1,12 @@
 package com.nhnacademy.task.project.repository;
 
 import com.nhnacademy.task.project.ProjectEntity;
-import com.nhnacademy.task.project.dto.ProjectSimpleResponseDto;
-import lombok.RequiredArgsConstructor;
+import com.nhnacademy.task.project.dto.resp.ProjectSimpleResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ProjectRepository
@@ -20,16 +17,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     @Query("""
-        SELECT NEW com.nhnacademy.task.project.dto.ProjectSimpleResponseDto(
-            p.id, p.name, p.state, p.createdAt
-        )
-        FROM projects p
-        INNER JOIN ProjectMemberEntity pm ON p.id = pm.projectEntity.id
+    SELECT NEW com.nhnacademy.task.project.dto.resp.ProjectSimpleResponse(
+        p.id, p.name, p.state, p.createdAt
+    )
+    FROM projects p
+    WHERE p.id IN (
+        SELECT pm.projectEntity.id
+        FROM project_members pm
         WHERE pm.userId = :userId
-        ORDER BY p.createdAt DESC
-    """)
-    Page<ProjectSimpleResponseDto> findAllByUserId(
-            @Param("userId") Long requestingUserId,
+    )
+    ORDER BY p.createdAt DESC
+""")
+    Page<ProjectSimpleResponse> findAllByUserId(
+            @Param("userId") Long userId,
             Pageable pageable
     );
 }
