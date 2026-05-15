@@ -20,11 +20,11 @@ public class TaskTagEntity {
     @Id
     private long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "tag_id")
     private TagEntity tagEntity;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "task_id")
     private TaskEntity taskEntity;
 }

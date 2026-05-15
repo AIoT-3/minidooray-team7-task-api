@@ -27,7 +27,7 @@ public class CommentEntity {
     @JoinColumn(name = "task_id")
     private TaskEntity taskEntity;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "project_member_id")
     private ProjectMemberEntity projectMemberEntity;
 

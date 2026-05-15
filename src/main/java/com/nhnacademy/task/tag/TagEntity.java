@@ -22,9 +22,9 @@ import java.time.LocalDateTime;
 public class TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 
