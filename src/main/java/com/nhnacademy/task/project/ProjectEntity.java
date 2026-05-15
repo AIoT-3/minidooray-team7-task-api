@@ -1,4 +1,4 @@
-package com.nhnacademy.task.projects;
+package com.nhnacademy.task.project;
 
 /**
  * Project
@@ -6,5 +6,5 @@ package com.nhnacademy.task.projects;
  * @author chosun-nhn12
  * @since 26. 5. 15.
  */
-public class Project {
+public class ProjectEntity {
 }

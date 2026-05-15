@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    default: dev
+  application:
+    name: task
+  servlet:
+    encoding:
+      charset: UTF-8
+
+server:
+  port: 8082
