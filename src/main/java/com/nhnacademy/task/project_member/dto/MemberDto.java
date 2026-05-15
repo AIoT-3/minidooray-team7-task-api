@@ -1,4 +1,4 @@
-package com.nhnacademy.task.member.dto;
+package com.nhnacademy.task.project_member.dto;
 
 /**
  * MemberDto
