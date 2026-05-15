@@ -1,4 +1,4 @@
-package com.nhnacademy.task.member.service;
+package com.nhnacademy.task.project_member.service;
 
 /**
  * MemberService

@@ -1,4 +1,4 @@
-package com.nhnacademy.task.member.repository;
+package com.nhnacademy.task.project_member.repository;
 
 /**
  * MemberRepository
