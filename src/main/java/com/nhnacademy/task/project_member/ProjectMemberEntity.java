@@ -31,5 +31,6 @@ public class ProjectMemberEntity {
     private ProjectMemberRole role;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 }

@@ -42,5 +42,6 @@ public class MilestoneEntity {
     private LocalDateTime createdAt;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 }

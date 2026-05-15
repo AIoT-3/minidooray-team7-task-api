@@ -43,9 +43,14 @@ public class TaskEntity {
     private LocalDateTime createdAt;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
+
     @ManyToOne(optional = false)
+    @JoinColumn(name = "project_member_id")
     private ProjectMemberEntity projectMemberEntity;
+
     @ManyToOne(optional = true)
+    @JoinColumn(name = "milestone_id")
     private MilestoneEntity milestoneEntity;
 }
