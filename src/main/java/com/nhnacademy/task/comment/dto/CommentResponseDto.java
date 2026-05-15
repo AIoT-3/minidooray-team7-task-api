@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * @author chosun-nhn12
  * @since 26. 5. 15.
  */
-public record CommentResponse(
+public record CommentResponseDto(
         Long id,
         Long projectMemberId,
         String content,

@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
  * @author chosun-nhn12
  * @since 26. 5. 15.
  */
-public record TagCreateRequest(
+public record TagCreateRequestDto(
         @NotBlank
         @Length(max = 50)
         String name
