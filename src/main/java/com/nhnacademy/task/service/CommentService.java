@@ -1,10 +1,9 @@
 package com.nhnacademy.task.service;
 
 import com.nhnacademy.task.dto.resp.CommentResponse;
-import com.nhnacademy.task.repository.CommentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.nhnacademy.task.entity.CommentEntity;
+import com.nhnacademy.task.entity.ProjectMemberEntity;
+import com.nhnacademy.task.entity.TaskEntity;
 
 import java.util.List;
 
@@ -12,16 +11,10 @@ import java.util.List;
  * CommentService
  *
  * @author chosun-nhn12
- * @since 26. 5. 15.
+ * @since 26. 5. 18.
  */
+public interface CommentService {
+    CommentEntity create(TaskEntity task, ProjectMemberEntity projectMember, String content);
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class CommentService {
-    private final CommentRepository commentRepository;
-
-    public List<CommentResponse> getComments(Long taskEntityId) {
-        return commentRepository.findAllByTaskEntity_Id(taskEntityId);
-    }
+    List<CommentResponse> getComments(Long taskEntityId);
 }

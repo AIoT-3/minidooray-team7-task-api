@@ -1,23 +1,18 @@
 package com.nhnacademy.task.service;
 
-import com.nhnacademy.task.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.nhnacademy.task.dto.resp.TagResponse;
+import com.nhnacademy.task.entity.ProjectEntity;
+import com.nhnacademy.task.entity.TagEntity;
+
+import java.util.List;
 
 /**
  * TagService
  *
  * @author chosun-nhn12
- * @since 26. 5. 15.
+ * @since 26. 5. 18.
  */
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class TagService {
-    private final TagRepository tagRepository;
-
-//    public List<TagResponse> getTagsByProjectId(Long projectId) {
-//        return tagRepository.findAllByProjectEntity_Id(projectId);
-//    }
+public interface TagService {
+    TagEntity createTag(ProjectEntity project, String name);
+    List<TagResponse> getTagsByProjectId(Long projectId);
 }

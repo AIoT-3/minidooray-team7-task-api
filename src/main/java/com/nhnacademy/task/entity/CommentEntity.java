@@ -53,6 +53,8 @@ public class CommentEntity {
         this.task = task;
         this.projectMember = projectMember;
         this.content = content;
+        createdAt = LocalDateTime.now();
+        updatedAt = this.createdAt;
     }
 
     public void updateContent(String content) {
