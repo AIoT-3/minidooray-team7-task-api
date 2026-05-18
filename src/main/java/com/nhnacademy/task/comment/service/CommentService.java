@@ -1,6 +1,7 @@
 package com.nhnacademy.task.comment.service;
 
 import com.nhnacademy.task.comment.dto.CommentResponseDto;
+import com.nhnacademy.task.comment.dto.resp.CommentResponse;
 import com.nhnacademy.task.comment.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,9 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
 
-//    public List<CommentResponseDto> getComments(Long taskEntityId) {
-//        return commentRepository.findAllByTaskEntityId(taskEntityId);
-//    }
+    public List<CommentResponse> getComments(Long taskEntityId) {
+        return commentRepository.findAllByTaskEntityId(taskEntityId);
+    }
+
+
 }

@@ -13,18 +13,18 @@ import lombok.NoArgsConstructor;
  * @since 26. 5. 15.
  */
 @Entity
-@Table(name = "tags")
+@Table(name = "task_tag")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TaskTagEntity {
     @Id
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tag_id")
     private TagEntity tagEntity;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "task_id")
     private TaskEntity taskEntity;
 }

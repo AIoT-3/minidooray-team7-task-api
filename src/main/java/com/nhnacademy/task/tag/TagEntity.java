@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * tag
@@ -24,16 +26,16 @@ public class TagEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "taskEntity")
-    private List<TaskTagEntity> taskTagEntityList;
+    @OneToMany(mappedBy = "taskEntity", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<TaskTagEntity> tasktags = new HashSet<>();
 }
