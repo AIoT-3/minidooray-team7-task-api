@@ -1,9 +1,9 @@
 package com.nhnacademy.task.repository;
 
-import com.nhnacademy.task.entity.TagEntity;
 import com.nhnacademy.task.entity.TaskTagEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -13,5 +13,11 @@ import java.util.Optional;
  * @since 26. 5. 15.
  */
 public interface TaskTagRepository extends JpaRepository<TaskTagEntity, Long> {
-    Optional<TagEntity> findByTagEntity_IdAndTaskEntity_Id(Long tagId, Long taskId);
+    List<TaskTagEntity> findAllByTask_Id(Long taskId);
+
+    Optional<TaskTagEntity> findByTag_IdAndTask_Id(Long tagId, Long taskId);
+
+    boolean existsByTag_IdAndTask_Id(Long tagId, Long taskId);
+
+    void deleteByTag_IdAndTask_Id(Long tagId, Long taskId);
 }

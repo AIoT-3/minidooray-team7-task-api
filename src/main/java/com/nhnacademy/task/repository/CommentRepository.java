@@ -1,5 +1,6 @@
 package com.nhnacademy.task.repository;
 
+import com.nhnacademy.task.dto.resp.CommentResponse;
 import com.nhnacademy.task.entity.CommentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,7 +14,7 @@ import java.util.Optional;
  * @since 26. 5. 15.
  */
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-    List<CommentEntity> findAllByTaskEntityId(Long taskEntityId);
+    List<CommentResponse> findAllByTask_Id(Long taskId);
 
-    Optional<CommentEntity> findByIdAndTaskEntityId(Long id, Long taskEntityId);
+    Optional<CommentEntity> findByIdAndTask_Id(Long commentId, Long taskId);
 }
