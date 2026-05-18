@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/main/java/com/nhnacademy/task/dto/req/ProjectUpdateRequest.java
 package com.nhnacademy.task.dto.req;
+========
+package com.nhnacademy.task.project.dto.req;
+>>>>>>>> origin/task-upper:src/main/java/com/nhnacademy/task/project/dto/req/ProjectUpdateRequest.java
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
