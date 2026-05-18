@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.value(),
                 e.getMessage()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     //500 Internal Server Error

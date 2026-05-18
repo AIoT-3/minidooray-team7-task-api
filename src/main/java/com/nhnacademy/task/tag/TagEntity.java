@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * tag
@@ -33,4 +34,6 @@ public class TagEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "taskEntity")
+    private List<TaskTagEntity> taskTagEntityList;
 }
