@@ -5,7 +5,6 @@ import com.nhnacademy.task.task.TaskEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
@@ -19,17 +18,16 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "task_id")
     private TaskEntity taskEntity;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "project_member_id")
     private ProjectMemberEntity projectMemberEntity;
 
