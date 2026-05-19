@@ -34,8 +34,9 @@ public class TaskTagServiceImpl implements TaskTagService {
     @Transactional
     @Override
     public TagResponse attachTag(Long projectId, Long taskId, Long tagId) {
-        TaskEntity task = taskRepository.findByIdAndProject_Id(taskId, projectId)
+        TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
+
         TagEntity tag = tagRepository.findByIdAndProject_Id(tagId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found"));
 
@@ -53,7 +54,7 @@ public class TaskTagServiceImpl implements TaskTagService {
 
     @Override
     public List<TagResponse> getTaskTags(Long projectId, Long taskId) {
-        taskRepository.findByIdAndProject_Id(taskId, projectId)
+        taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
 
         List<TaskTagEntity> taskTags = taskTagRepository.findAllByTask_IdAndTask_Project_Id(taskId, projectId);
@@ -69,13 +70,16 @@ public class TaskTagServiceImpl implements TaskTagService {
     @Override
     @Transactional
     public void detachTag(Long projectId, Long taskId, Long tagId) {
-        taskRepository.findByIdAndProject_Id(taskId, projectId)
+        TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
-        tagRepository.findByIdAndProject_Id(tagId, projectId)
+        TagEntity tag = tagRepository.findByIdAndProject_Id(tagId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found"));
 
         TaskTagEntity taskTag = taskTagRepository.findByTag_IdAndTask_IdAndTask_Project_Id(tagId, taskId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Task tag not found"));
+
+        tag.getTaskTagList().remove(taskTag);
+        task.getTaskTagList().remove(taskTag);
 
         taskTagRepository.delete(taskTag);
     }

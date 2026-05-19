@@ -23,6 +23,7 @@ import java.util.List;
 public class TaskTagController {
     private final TaskTagService taskTagService;
 
+
     @GetMapping
     public List<TagResponse> getTaskTags(
             @PathVariable("project-id") Long projectId,
@@ -46,7 +47,7 @@ public class TaskTagController {
         return attachedTags;
     }
 
-    @DeleteMapping("/{tag-id}")
+    @PutMapping("/{tag-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void detachTaskTag(
             @PathVariable("project-id") Long projectId,

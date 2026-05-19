@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,13 +32,17 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public CommentResponse createComment(Long projectId, Long taskId, Long projectMemberId, String content) {
-        TaskEntity task = taskRepository.findByIdAndProject_Id(taskId, projectId)
+    public CommentResponse createComment(Long taskId, Long projectMemberId, String content) {
+
+        TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
-        ProjectMemberEntity projectMember = projectMemberRepository.findByIdAndProject_Id(projectMemberId, projectId)
+        ProjectMemberEntity projectMember = projectMemberRepository.findById(projectMemberId)
                 .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
 
+
         CommentEntity comment = new CommentEntity(task, projectMember, content);
+        task.addComment(comment);
+        projectMember.addComment(comment);
         CommentEntity saved = commentRepository.save(comment);
 
         return toResponse(saved);
@@ -47,24 +50,23 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentResponse> getComments(Long projectId, Long taskId) {
-        taskRepository.findByIdAndProject_Id(taskId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Task not found"));
 
-        List<CommentEntity> commentEntities = commentRepository.findAllByTask_IdOrderByCreatedAtAsc(taskId);
-        List<CommentResponse> commentResponses = new ArrayList<>();
-
-        for (CommentEntity commentEntity : commentEntities) {
-            commentResponses.add(toResponse(commentEntity));
+        if (!taskRepository.existsByProject_IdAndId(projectId, taskId)) {
+            throw new EntityNotFoundException("Task not found");
         }
-        return commentResponses;
+
+        return commentRepository.findAllByTask_Id(taskId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
     @Transactional
     public CommentResponse updateComment(Long projectId, Long taskId, Long commentId, Long projectMemberId, String content) {
-        projectMemberRepository.findByIdAndProject_Id(projectMemberId, projectId)
+
+        projectMemberRepository.findByProject_IdAndUserId(projectMemberId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
-        taskRepository.findByIdAndProject_Id(taskId, projectId)
+        taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
         CommentEntity comment = commentRepository.findByIdAndTask_Id(commentId, taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
@@ -81,16 +83,19 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public void deleteComment(Long projectId, Long taskId, Long commentId, Long projectMemberId) {
-        projectMemberRepository.findByIdAndProject_Id(projectMemberId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
-        taskRepository.findByIdAndProject_Id(taskId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Task not found"));
         CommentEntity comment = commentRepository.findByIdAndTask_Id(commentId, taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+
+        if (!projectId.equals(comment.getTask().getProject().getId())) {
+            throw new EntityNotFoundException("Task not found");
+        }
 
         if (!projectMemberId.equals(comment.getProjectMember().getId())) {
             throw new NoPermissionException("이 댓글을 삭제할 권한이 없습니다.");
         }
+
+        comment.getTask().removeComment(comment);
+        comment.getProjectMember().removeComment(comment);
 
         commentRepository.delete(comment);
     }

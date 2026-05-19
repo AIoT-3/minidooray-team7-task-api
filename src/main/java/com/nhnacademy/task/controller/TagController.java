@@ -46,7 +46,7 @@ public class TagController {
         return tagService.updateTag(projectId, tagId, request.name());
     }
 
-    @DeleteMapping("/{tag-id}")
+    @PutMapping("/{tag-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTag(
             @PathVariable("project-id") Long projectId,

@@ -34,11 +34,12 @@ public class TagServiceImpl implements TagService {
         ProjectEntity project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
-        if (tagRepository.existsByProject_IdAndName(projectId, name)) {
+        if (tagRepository.existsByProject_idAndName(projectId, name)) {
             throw new EntityAlreadyExistsException("tag already exists for project");
         }
 
         TagEntity tag = new TagEntity(project, name);
+        project.addTag(tag);
         TagEntity saved = tagRepository.save(tag);
 
         return toResponse(saved);
@@ -49,22 +50,16 @@ public class TagServiceImpl implements TagService {
         projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
-        List<TagEntity> tags = tagRepository.findAllByProject_IdOrderByNameAsc(projectId);
-        List<TagResponse> tagResponses = new ArrayList<>();
-
-        for (TagEntity tag : tags) {
-            tagResponses.add(toResponse(tag));
-        }
-
-        return tagResponses;
+        return tagRepository.findAllByProject_Id(projectId);
     }
 
     @Transactional
     @Override
     public TagResponse updateTag(Long projectId, Long tagId, String name) {
-        TagEntity tag = getTagInProject(projectId, tagId);
+        TagEntity tag = tagRepository.findByIdAndProject_Id(tagId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found"));
 
-        if (!tag.getName().equals(name) && tagRepository.existsByProject_IdAndName(projectId, name)) {
+        if (!tag.getName().equals(name) && tagRepository.existsByProject_idAndName(projectId, name)) {
             throw new EntityAlreadyExistsException("tag already exists for project");
         }
 
@@ -75,13 +70,14 @@ public class TagServiceImpl implements TagService {
     @Transactional
     @Override
     public void deleteTag(Long projectId, Long tagId) {
-        TagEntity tag = getTagInProject(projectId, tagId);
-        tagRepository.delete(tag);
-    }
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
-    private TagEntity getTagInProject(Long projectId, Long tagId) {
-        return tagRepository.findByIdAndProject_Id(tagId, projectId)
+        TagEntity tag = tagRepository.findByIdAndProject_Id(tagId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found"));
+
+        project.getTagList().remove(tag);
+        tagRepository.delete(tag);
     }
 
     private TagResponse toResponse(TagEntity tag) {

@@ -17,4 +17,6 @@ public interface TagRepository extends JpaRepository<TagEntity, Long> {
     List<TagResponse> findAllByProject_Id(Long projectId);
     Optional<TagEntity> findByIdAndProject_Id(Long tagId, Long projectId);
     boolean existsByProject_idAndName(Long projectId, String tagName);
+
+    boolean existsByProject_idAndId(Long projectId, Long id);
 }

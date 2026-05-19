@@ -35,10 +35,10 @@ public class CommentController {
     public CommentResponse createComment(
             @PathVariable("project-id") Long projectId,
             @PathVariable("task-id") Long taskId,
-            @RequestHeader("X-Project-Member-Id") Long projectMemberId,
+            @RequestHeader("X-USER-ID") Long projectMemberId,
             @Valid @RequestBody CommentCreateRequest request
             ) {
-        return commentService.createComment(projectId, taskId, projectMemberId, request.content());
+        return commentService.createComment(taskId, projectMemberId, request.content());
     }
 
     @PutMapping("/{comment-id}")
@@ -46,19 +46,19 @@ public class CommentController {
             @PathVariable("project-id") Long projectId,
             @PathVariable("task-id") Long taskId,
             @PathVariable("comment-id") Long commentId,
-            @RequestHeader("X-Project-Member-Id") Long projectMemberId,
+            @RequestHeader("X-USER-ID") Long projectMemberId,
             @Valid @RequestBody CommentUpdateRequest request
             ) {
         return commentService.updateComment(projectId, taskId, commentId, projectMemberId, request.content());
     }
 
-    @DeleteMapping("/{comment-id}")
+    @PutMapping("/{comment-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
             @PathVariable("project-id") Long projectId,
             @PathVariable("task-id") Long taskId,
             @PathVariable("comment-id") Long commentId,
-            @RequestHeader("X-Project-Member-Id") Long projectMemberId
+            @RequestHeader("X-USER-ID") Long projectMemberId
     ) {
         commentService.deleteComment(projectId, taskId, commentId, projectMemberId);
     }
