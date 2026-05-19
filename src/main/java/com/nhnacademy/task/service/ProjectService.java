@@ -1,10 +1,13 @@
 package com.nhnacademy.task.service;
 
 import com.nhnacademy.task.dto.req.ProjectCreateRequest;
+import com.nhnacademy.task.dto.resp.ProjectDetailResponse;
 import com.nhnacademy.task.dto.resp.ProjectSimpleResponse;
 import com.nhnacademy.task.dto.req.ProjectUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * ProjectService
@@ -18,8 +21,8 @@ public interface ProjectService {
 
     //read
     ProjectSimpleResponse getProjectSimpleInfoById(Long requestingUserId, Long projectId);
-    // ProjectDetailResponse getProjectDetailInfoById(Long requestingUserId, Long projectId);
-    Page<ProjectSimpleResponse> getProjectsPageByUserId(Long requestingUserId, Pageable pageable);
+    ProjectDetailResponse getProjectDetailInfoById(Long requestingUserId, Long projectId);
+    List<ProjectSimpleResponse> getProjectsByUserId(Long requestingUserId);
 
     //update
     void updateProject(Long requestingUserId, Long projectId, ProjectUpdateRequest projectUpdateRequest);

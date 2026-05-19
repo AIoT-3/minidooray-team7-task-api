@@ -53,12 +53,6 @@ public class ProjectMemberEntity {
     @JsonBackReference(value = "projectMember-comment")
     private List<CommentEntity> commentList = new ArrayList<>();
 
-    public ProjectMemberEntity(Long projectId, Long userId, ProjectMemberRole role) {
-        this.userId = userId;
-        this.role = role;
-        this.isDeleted = false;
-    }
-
     public ProjectMemberEntity(ProjectEntity project, Long userId, ProjectMemberRole role) {
         this.project = project;
         this.userId = userId;

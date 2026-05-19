@@ -1,5 +1,6 @@
 package com.nhnacademy.task.repository;
 
+import com.nhnacademy.task.entity.TagEntity;
 import com.nhnacademy.task.entity.TaskTagEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -18,6 +19,7 @@ public interface TaskTagRepository extends JpaRepository<TaskTagEntity, Long> {
     List<TaskTagEntity> findAllByTask_IdAndTask_Project_Id(Long taskId, Long projectId);
 
     Optional<TaskTagEntity> findByTag_IdAndTask_Id(Long tagId, Long taskId);
+    //TagEntity?
 
     Optional<TaskTagEntity> findByTag_IdAndTask_IdAndTask_Project_Id(Long tagId, Long taskId, Long projectId);
 
