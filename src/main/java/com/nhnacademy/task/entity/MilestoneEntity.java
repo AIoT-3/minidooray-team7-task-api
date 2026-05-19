@@ -50,7 +50,7 @@ public class MilestoneEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "milestone", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY)
     @JsonManagedReference(value = "milestone-task")
     private List<TaskEntity> taskList = new ArrayList<>();
 

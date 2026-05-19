@@ -10,6 +10,7 @@ import com.nhnacademy.task.dto.resp.MileStoneSimpleResponse;
 import com.nhnacademy.task.entity.MilestoneEntity;
 import com.nhnacademy.task.entity.ProjectEntity;
 import com.nhnacademy.task.entity.ProjectMemberEntity;
+import com.nhnacademy.task.entity.TaskEntity;
 import com.nhnacademy.task.repository.MilestoneRepository;
 import com.nhnacademy.task.repository.ProjectMemberRepository;
 import com.nhnacademy.task.repository.ProjectRepository;
@@ -29,6 +30,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     private final ProjectMemberRepository projectMemberRepository;
 
     @Transactional
+    @Override
     public void createMilestoneToProject(Long requestingUserId, Long projectId, MileStoneCreateRequest mileStoneCreateRequest){
         if(mileStoneCreateRequest.endDate().isBefore(mileStoneCreateRequest.startDate())){
             throw new InvalidRequestException(
@@ -63,6 +65,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public MileStoneDetailResponse getMilestoneDetailInfoById(Long requestingUserId, Long projectId, Long milestoneId){
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException(
@@ -98,6 +101,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public List<MileStoneSimpleResponse> getMilestoneSimpleInfosByProjectId(Long requestingUserId, Long projectId){
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException(
@@ -129,6 +133,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Transactional
+    @Override
     public void updateMilestone(Long requestingUserId, Long projectId, Long milestoneId, MileStoneUpdateRequest mileStoneUpdateRequest){
         if(mileStoneUpdateRequest.endDate().isBefore(mileStoneUpdateRequest.startDate())){
             throw new InvalidRequestException(
@@ -174,6 +179,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Transactional
+    @Override
     public void deleteMilestoneOnProject(Long requestingUserId, Long projectId, Long milestoneId){
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -198,8 +204,13 @@ public class MilestoneServiceImpl implements MilestoneService {
             );
         }
 
+        for (TaskEntity task : new ArrayList<>(milestoneEntity.getTaskList())) {
+            task.setMilestone(null);
+        }
+
         projectEntity.getMilestoneList().remove(milestoneEntity);
         milestoneEntity.setProject(null);
+
         milestoneRepository.save(milestoneEntity);
     }
 
