@@ -54,16 +54,12 @@ public class MilestoneEntity {
     @JsonManagedReference(value = "milestone-task")
     private List<TaskEntity> taskList = new ArrayList<>();
 
-    public MilestoneEntity(String name, ProjectEntity project) {
-        this.name = name;
-        this.project = project;
-    }
-
     public MilestoneEntity(String name, ProjectEntity project, LocalDateTime startDate, LocalDateTime endDate) {
         this.name = name;
         this.project = project;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.createdAt = LocalDateTime.now();
     }
 
     public void setProject(ProjectEntity project) {
@@ -82,5 +78,11 @@ public class MilestoneEntity {
 
     public void removeTask(TaskEntity task) {
         task.setMilestone(null);
+    }
+
+    public void updateNameAndStartDateAndEndDate(String name, LocalDateTime startDate, LocalDateTime endDate){
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 }

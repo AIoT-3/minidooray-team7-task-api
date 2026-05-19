@@ -13,5 +13,5 @@ import java.util.Optional;
  * @since 26. 5. 15.
  */
 public interface TaskTagRepository extends JpaRepository<TaskTagEntity, Long> {
-    Optional<TagEntity> findByTagEntity_IdAndTaskEntity_Id(Long tagId, Long taskId);
+    Optional<TagEntity> findByTag_IdAndTag_Id(Long tagId, Long taskId);
 }
