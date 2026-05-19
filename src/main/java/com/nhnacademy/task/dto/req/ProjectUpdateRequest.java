@@ -10,5 +10,5 @@ public record ProjectUpdateRequest (
     String name,
 
     @Pattern(regexp = "^(?i)(ACTIVE|DORMANT|CLOSED)$", message = "project status value must be \'ACTIVE\' or \'DORMANT\' or \'CLOSED\'")
-    String status
+    String state
 ){}

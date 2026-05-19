@@ -123,7 +123,9 @@ public class MilestoneServiceImpl implements MilestoneService {
                 mileStoneSimpleResponses.add(
                         new MileStoneSimpleResponse(
                                 milestoneEntity.getId(),
-                                milestoneEntity.getName()
+                                milestoneEntity.getName(),
+                                milestoneEntity.getStartDate(),
+                                milestoneEntity.getEndDate()
                         )
                 );
             }

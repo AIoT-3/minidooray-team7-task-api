@@ -8,6 +8,7 @@ public record ProjectDetailResponse(
         String name,
         String state,
         LocalDateTime createdAt,
+        List<TagResponse> tagList,
         List<MileStoneSimpleResponse> mileStoneList,
         List<TaskSimpleResponse> taskList,
         List<ProjectMemberResponse> memberList

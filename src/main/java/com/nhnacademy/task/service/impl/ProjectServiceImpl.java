@@ -93,9 +93,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         List<MileStoneSimpleResponse> milestoneDtos = projectEntity.getMilestoneList().stream()
-                .map(milestoneEntity -> {
-                    return new MileStoneSimpleResponse(milestoneEntity.getId(), milestoneEntity.getName());
-                })
+                .map(MileStoneSimpleResponse::from)
                 .toList();
 
         List<TaskSimpleResponse> taskDtos = projectEntity.getTaskList().stream()
@@ -103,7 +101,7 @@ public class ProjectServiceImpl implements ProjectService {
                     long id = taskEntity.getId();
                     long projectMemberId = taskEntity.getProjectMember().getId();
                     String name = taskEntity.getName();
-                    MileStoneSimpleResponse mileStone = new MileStoneSimpleResponse(taskEntity.getId(), taskEntity.getName());
+                    MileStoneSimpleResponse mileStone = taskEntity.getMilestone() == null ? null : MileStoneSimpleResponse.from(taskEntity.getMilestone());
 
                     List<TagResponse> tagList = new ArrayList<>();
                     for (TaskTagEntity taskTagEntity : taskEntity.getTaskTagList()) {
@@ -124,11 +122,16 @@ public class ProjectServiceImpl implements ProjectService {
                 })
                 .toList();
 
+        List<TagResponse> tagDtos = projectEntity.getTagList().stream()
+                .map(tag -> new TagResponse(tag.getId(), tag.getName()))
+                .toList();
+
 
         return new ProjectDetailResponse(projectEntity.getId(),
                 projectEntity.getName(),
                 projectEntity.getState().name(),
                 projectEntity.getCreatedAt(),
+                tagDtos,
                 milestoneDtos,
                 taskDtos,
                 memberDtos);
@@ -154,7 +157,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         //프로젝트 update
-        String status = projectUpdateRequest.status();
+        String status = projectUpdateRequest.state();
         ProjectState projectState = ProjectState.valueOf(status);
         // 변경 감지로 인해 update
         projectEntity.updateNameAndState(projectUpdateRequest.name(), projectState);
