@@ -61,6 +61,7 @@ public class ProjectEntity {
     public ProjectEntity(String name, ProjectState state) {
         this.name = name;
         this.state = state;
+        this.createdAt = LocalDateTime.now();
     }
 
     public ProjectEntity(String name, ProjectState state, LocalDateTime createdAt) {
@@ -99,5 +100,10 @@ public class ProjectEntity {
 
     public void removeTag(TagEntity tag) {
         tag.setProject(null);
+    }
+
+    public void updateNameAndState(String name, ProjectState state) {
+        this.name = name;
+        this.state = state;
     }
 }

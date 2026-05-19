@@ -13,7 +13,7 @@ import java.util.Optional;
  * @since 26. 5. 15.
  */
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-    List<CommentEntity> findAllByTaskEntityId(Long taskEntityId);
+    List<CommentEntity> findAllByTask_Id(Long taskEntityId);
 
-    Optional<CommentEntity> findByIdAndTaskEntityId(Long id, Long taskEntityId);
+    Optional<CommentEntity> findByIdAndTask_Id(Long id, Long taskEntityId);
 }

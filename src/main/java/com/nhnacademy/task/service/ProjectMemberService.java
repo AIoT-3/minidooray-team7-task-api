@@ -22,6 +22,6 @@ public interface ProjectMemberService {
 
     //update
     //delete
-    void deleteProjectMember(Long requestingUserId, Long userId, Long projectId);
-
+    void deleteProjectMemberByUserIdAndProjectId(Long requestingUserId, Long userId, Long projectId);
+    void deleteProjectMemberByProjectIdAndProjectMemberId(Long requestingUserId, Long projectId, Long projectMemberId);
 }

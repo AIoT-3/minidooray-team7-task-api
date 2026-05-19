@@ -35,11 +35,13 @@ public class TaskEntity {
     @JsonBackReference(value = "project-task")
     private ProjectEntity project;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_members_id")
     @JsonBackReference(value = "projectMember-task")
     private ProjectMemberEntity projectMember;
 
+    //null 허용
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "milestone_id")
     @JsonBackReference(value = "milestone-task")
@@ -65,24 +67,15 @@ public class TaskEntity {
     @JsonManagedReference(value = "task-taskTag")
     private List<TaskTagEntity> taskTagList = new ArrayList<>();
 
-    public TaskEntity(String name, ProjectEntity project) {
-        this.name = name;
-        this.project = project;
-    }
-
-    public TaskEntity(String name, ProjectEntity project, String content) {
-        this.name = name;
-        this.project = project;
-        this.content = content;
-    }
-
-    public TaskEntity(String name, ProjectEntity project, ProjectMemberEntity projectMember,
-                      MilestoneEntity milestone, String content) {
+    public TaskEntity(String name,
+                      ProjectEntity project,
+                      ProjectMemberEntity projectMember,
+                      String content) {
         this.name = name;
         this.project = project;
         this.projectMember = projectMember;
-        this.milestone = milestone;
         this.content = content;
+        this.createdAt = LocalDateTime.now();
     }
 
     public void setProject(ProjectEntity project) {
@@ -129,5 +122,10 @@ public class TaskEntity {
 
     public void removeTaskTag(TaskTagEntity taskTag) {
         taskTag.setTask(null);
+    }
+
+    public void updateNameAndContent(String name, String content){
+        this.name = name;
+        this.content = content;
     }
 }
