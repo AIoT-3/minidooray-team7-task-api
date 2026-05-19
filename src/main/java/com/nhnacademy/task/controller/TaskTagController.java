@@ -47,7 +47,7 @@ public class TaskTagController {
         return attachedTags;
     }
 
-    @PutMapping("/{tag-id}")
+    @DeleteMapping("/{tag-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void detachTaskTag(
             @PathVariable("project-id") Long projectId,

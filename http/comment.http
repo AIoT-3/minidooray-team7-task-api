@@ -1,0 +1,11 @@
+### 변수
+@host = http://localhost:8082
+@project-id = 1
+@task-id = 1
+@comment-id = 1
+@tag-id = 1
+@projectMemberId = 1
+
+### 댓글 목록 조회
+GET {{host}}/projects/{{project-id}}/tasks/{{task-id}}/comments
+Accept: application/json
