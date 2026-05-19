@@ -1,8 +1,8 @@
 package com.nhnacademy.task.service;
 
-import com.nhnacademy.task.entity.TagEntity;
-import com.nhnacademy.task.entity.TaskEntity;
-import com.nhnacademy.task.entity.TaskTagEntity;
+import com.nhnacademy.task.dto.resp.TagResponse;
+
+import java.util.List;
 
 /**
  * TaskTagService
@@ -11,5 +11,9 @@ import com.nhnacademy.task.entity.TaskTagEntity;
  * @since 26. 5. 18.
  */
 public interface TaskTagService {
-    TaskTagEntity createTaskTag(TagEntity tag, TaskEntity task);
+    TagResponse attachTag(Long projectId, Long taskId, Long tagId);
+
+    List<TagResponse> getTaskTags(Long projectId, Long taskId);
+
+    void detachTag(Long projectId, Long taskId, Long tagId);
 }

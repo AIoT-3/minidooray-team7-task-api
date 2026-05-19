@@ -1,7 +1,5 @@
 package com.nhnacademy.task.repository;
 
-import com.nhnacademy.task.dto.resp.TagResponse;
-import com.nhnacademy.task.entity.ProjectEntity;
 import com.nhnacademy.task.entity.TagEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,7 +13,7 @@ import java.util.Optional;
  * @since 26. 5. 15.
  */
 public interface TagRepository extends JpaRepository<TagEntity, Long> {
-    List<TagResponse> findAllByProject_Id(Long projectId);
-    Optional<TagResponse> findByIdAndProject_Id(Long tagId, Long projectId);
+    List<TagEntity> findAllByProject_IdOrderByNameAsc(Long projectId);
+    Optional<TagEntity> findByIdAndProject_Id(Long tagId, Long projectId);
     boolean existsByProject_IdAndName(Long projectId, String tagName);
 }

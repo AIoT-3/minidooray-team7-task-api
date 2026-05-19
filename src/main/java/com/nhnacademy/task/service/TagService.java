@@ -1,8 +1,6 @@
 package com.nhnacademy.task.service;
 
 import com.nhnacademy.task.dto.resp.TagResponse;
-import com.nhnacademy.task.entity.ProjectEntity;
-import com.nhnacademy.task.entity.TagEntity;
 
 import java.util.List;
 
@@ -13,6 +11,11 @@ import java.util.List;
  * @since 26. 5. 18.
  */
 public interface TagService {
-    TagEntity createTag(ProjectEntity project, String name);
+    TagResponse createTag(Long projectId, String name);
+
     List<TagResponse> getTagsByProjectId(Long projectId);
+
+    TagResponse updateTag(Long projectId, Long tagId, String name);
+
+    void deleteTag(Long projectId, Long tagId);
 }

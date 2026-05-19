@@ -50,8 +50,8 @@ public class CommentEntity {
     private LocalDateTime updatedAt;
 
     public CommentEntity(TaskEntity task, ProjectMemberEntity projectMember, String content) {
-        this.task = task;
-        this.projectMember = projectMember;
+        setTask(task);
+        setProjectMember(projectMember);
         this.content = content;
         createdAt = LocalDateTime.now();
         updatedAt = this.createdAt;
