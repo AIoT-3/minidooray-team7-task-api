@@ -9,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
@@ -45,6 +47,7 @@ public class TaskEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "milestone_id")
     @JsonBackReference(value = "milestone-task")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private MilestoneEntity milestone;
 
     @NotBlank

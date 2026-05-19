@@ -2,6 +2,7 @@ package com.nhnacademy.task.service;
 
 
 import com.nhnacademy.task.dto.req.TaskCreateRequest;
+import com.nhnacademy.task.dto.req.TaskMileStoneCreateRequest;
 import com.nhnacademy.task.dto.req.TaskUpdateRequest;
 import com.nhnacademy.task.dto.resp.TaskDetailResponse;
 import com.nhnacademy.task.dto.resp.TaskSimpleResponse;
@@ -19,6 +20,8 @@ public interface TaskService {
 
     //update
     void updateTask(Long requestingUserId, Long projectId, Long taskId, TaskUpdateRequest taskUpdateRequest);
+    void addMilestoneToTask(Long requestingUserId, Long projectId, Long taskId, TaskMileStoneCreateRequest mileStoneCreateRequest);
+    void removeMilestoneOnTask(Long requestingUserId, Long projectId, Long taskId, Long milestoneId);
 
     //delete
     void deleteTask(Long requestingUserId, Long projectId, Long taskId);

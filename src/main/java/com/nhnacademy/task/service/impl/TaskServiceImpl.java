@@ -4,8 +4,10 @@ import com.nhnacademy.task.common.exception.EntityNotFoundException;
 import com.nhnacademy.task.common.exception.InvalidRequestException;
 import com.nhnacademy.task.common.exception.NoPermissionException;
 import com.nhnacademy.task.dto.req.TaskCreateRequest;
+import com.nhnacademy.task.dto.req.TaskMileStoneCreateRequest;
 import com.nhnacademy.task.dto.req.TaskUpdateRequest;
 import com.nhnacademy.task.dto.resp.*;
+import com.nhnacademy.task.entity.MilestoneEntity;
 import com.nhnacademy.task.entity.ProjectEntity;
 import com.nhnacademy.task.entity.ProjectMemberEntity;
 import com.nhnacademy.task.entity.TaskEntity;
@@ -28,7 +30,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
-    //private final MilestoneRepository milestoneRepository;
+    private final MilestoneRepository milestoneRepository;
 
     //re-checked
     @Transactional
@@ -227,6 +229,97 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.save(taskEntity);
     }
 
+    @Transactional
+    @Override
+    public void addMilestoneToTask(Long requestingUserId, Long projectId, Long taskId, TaskMileStoneCreateRequest mileStoneCreateRequest){
+        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("id:%s project not found", projectId)
+                ));
+
+        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, requestingUserId).orElseThrow(
+                () -> new NoPermissionException(
+                        String.format("id:%s user has no user permission for id:%s project",
+                                requestingUserId, projectId)
+                ));
+
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("id:%s task not found", taskId)
+                )
+        );
+
+        if (!taskEntity.getProject().getId().equals(projectId)) {
+            throw new InvalidRequestException(
+                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
+            );
+        }
+
+        MilestoneEntity milestoneEntity = milestoneRepository.findById(mileStoneCreateRequest.mileStoneId()).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("id:%s milestone not found", mileStoneCreateRequest.mileStoneId())
+                )
+        );
+
+        if (!milestoneEntity.getProject().getId().equals(projectId)) {
+            throw new InvalidRequestException(
+                    String.format("id:%s milestone does not belong to id:%s project", mileStoneCreateRequest.mileStoneId(), projectId)
+            );
+        }
+
+        taskEntity.setMilestone(milestoneEntity);
+        taskRepository.save(taskEntity);
+    }
+
+    @Transactional
+    @Override
+    public void removeMilestoneOnTask(Long requestingUserId, Long projectId, Long taskId, Long milestoneId){
+        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("id:%s project not found", projectId)
+                ));
+
+        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, requestingUserId).orElseThrow(
+                () -> new NoPermissionException(
+                        String.format("id:%s user has no user permission for id:%s project",
+                                requestingUserId, projectId)
+                ));
+
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("id:%s task not found", taskId)
+                )
+        );
+
+        if (!taskEntity.getProject().getId().equals(projectId)) {
+            throw new InvalidRequestException(
+                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
+            );
+        }
+
+        MilestoneEntity milestoneEntity = milestoneRepository.findById(milestoneId).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("id:%s milestone not found", milestoneId)
+                )
+        );
+
+        if(!milestoneEntity.getProject().getId().equals(projectId)){
+            throw new InvalidRequestException(
+                    String.format("id:%s milestone does not belong to id:%s project", milestoneId, projectId)
+            );
+        }
+
+        if(taskEntity.getMilestone() == null || !taskEntity.getMilestone().getId().equals(milestoneId)){
+            throw new InvalidRequestException(
+                    String.format("id:%s milestone does not belong to id:%s task",
+                            milestoneId, taskId)
+            );
+        }
+
+        taskEntity.setMilestone(null);
+        taskRepository.save(taskEntity);
+    }
+
     //re-checked
     @Transactional
     @Override
@@ -253,10 +346,6 @@ public class TaskServiceImpl implements TaskService {
                     String.format("id:%s task does not belong to id:%s project", taskId, projectId)
             );
         }
-
-        projectEntity.getTaskList().remove(taskEntity);
-        projectMemberEntity.getTaskList().remove(taskEntity);
-        //TODO... milestone entity 객체에서 지워줘야 함...
 
         taskEntity.setProject(null);
         taskEntity.setProjectMember(null);

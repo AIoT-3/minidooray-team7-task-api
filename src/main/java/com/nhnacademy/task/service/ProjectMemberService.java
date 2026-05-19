@@ -5,12 +5,6 @@ import com.nhnacademy.task.dto.resp.ProjectMemberResponse;
 
 import java.util.List;
 
-/**
- * MemberService
- *
- * @author chosun-nhn12
- * @since 26. 5. 15.
- */
 public interface ProjectMemberService {
     //create
     void createProjectMember(Long requestingUserId, Long projectId, ProjectMemberCreateRequest projectMemberCreateRequest);
