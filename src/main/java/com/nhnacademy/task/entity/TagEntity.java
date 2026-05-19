@@ -51,6 +51,7 @@ public class TagEntity {
     public TagEntity(ProjectEntity project, String name) {
         this.project = project;
         this.name = name;
+        createdAt = LocalDateTime.now();
     }
 
     public TagEntity(ProjectEntity project, String name, LocalDateTime createdAt) {
@@ -71,6 +72,11 @@ public class TagEntity {
 
     public void addTaskTag(TaskTagEntity taskTag) {
         taskTag.setTag(this);
+    }
+
+    public TagEntity updateName(String name) {
+        this.name = name;
+        return this;
     }
 
     public void removeTaskTag(TaskTagEntity taskTag) {

@@ -1,24 +1,21 @@
 package com.nhnacademy.task.service;
 
-import com.nhnacademy.task.repository.CommentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.nhnacademy.task.dto.resp.CommentResponse;
+
+import java.util.List;
 
 /**
  * CommentService
  *
  * @author chosun-nhn12
- * @since 26. 5. 15.
+ * @since 26. 5. 18.
  */
+public interface CommentService {
+    CommentResponse createComment(Long taskId, Long projectMemberId, String content);
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class CommentService {
-    private final CommentRepository commentRepository;
+    List<CommentResponse> getComments(Long projectId, Long taskId);
 
-//    public List<CommentResponseDto> getComments(Long taskEntityId) {
-//        return commentRepository.findAllByTaskEntityId(taskEntityId);
-//    }
+    CommentResponse updateComment(Long projectId, Long taskId, Long commentId, Long projectMemberId, String content);
+
+    void deleteComment(Long projectId, Long taskId, Long commentId, Long projectMemberId);
 }
