@@ -52,7 +52,7 @@ public class CommentController {
         return commentService.updateComment(projectId, taskId, commentId, projectMemberId, request.content());
     }
 
-    @PutMapping("/{comment-id}")
+    @DeleteMapping("/{comment-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
             @PathVariable("project-id") Long projectId,
