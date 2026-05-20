@@ -2,6 +2,7 @@ package com.nhnacademy.task.service.impl;
 
 import com.nhnacademy.task.common.exception.EntityNotFoundException;
 import com.nhnacademy.task.common.exception.NoPermissionException;
+import com.nhnacademy.task.common.validator.BusinessRuleValidator;
 import com.nhnacademy.task.dto.resp.*;
 import com.nhnacademy.task.entity.*;
 import com.nhnacademy.task.dto.req.ProjectCreateRequest;
@@ -21,6 +22,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
 
+    private final BusinessRuleValidator businessRuleValidator;
+
     //re-checked
     @Transactional
     @Override
@@ -39,26 +42,12 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional(readOnly = true)
     @Override
     public ProjectSimpleResponse getProjectSimpleInfoById(Long requestingUserId, Long projectId){
-        //프로젝트 find
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-                )
-        );
+        //프로젝트 존재 여부 검증 후 find
+        ProjectEntity projectEntity = businessRuleValidator.findProjectOrThrow(projectId);
+        //요청자가 프로젝트 멤버 인지 확인
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
 
-
-        //요청자의 프로젝트 멤버 권한 확인
-        if(!projectMemberRepository.existsByUserIdAndProject_Id(requestingUserId, projectId)){
-            throw new NoPermissionException(
-                    String.format("id:%s user has no member permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
-
-        return new ProjectSimpleResponse(projectEntity.getId(),
-                projectEntity.getName(),
-                projectEntity.getState().name(),
-                projectEntity.getCreatedAt());
+        return ProjectSimpleResponse.from(projectEntity);
     }
 
     //re-checked
@@ -77,91 +66,27 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional(readOnly = true)
     @Override
     public ProjectDetailResponse getProjectDetailInfoById(Long requestingUserId, Long projectId) {
-        //프로젝트 find
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-                )
-        );
+        //프로젝트 존재 여부 검증 후 find
+        ProjectEntity projectEntity = businessRuleValidator.findProjectOrThrow(projectId);
+        //요청자가 프로젝트 멤버 인지 확인
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
 
-        //요청자의 프로젝트 멤버 권한 확인
-        if(!projectMemberRepository.existsByUserIdAndProject_Id(requestingUserId,projectId)){
-            throw new NoPermissionException(
-                    String.format("id:%s user has no member permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
-
-        List<MileStoneSimpleResponse> milestoneDtos = projectEntity.getMilestoneList().stream()
-                .map(MileStoneSimpleResponse::from)
-                .toList();
-
-        List<TaskSimpleResponse> taskDtos = projectEntity.getTaskList().stream()
-                .map(taskEntity -> {
-                    long id = taskEntity.getId();
-                    long projectMemberId = taskEntity.getProjectMember().getId();
-                    String name = taskEntity.getName();
-                    MileStoneSimpleResponse mileStone = taskEntity.getMilestone() == null ? null : MileStoneSimpleResponse.from(taskEntity.getMilestone());
-
-                    List<TagResponse> tagList = new ArrayList<>();
-                    for (TaskTagEntity taskTagEntity : taskEntity.getTaskTagList()) {
-                        tagList.add(new TagResponse(taskTagEntity.getId(),
-                                taskTagEntity.getTag().getName()));
-                    }
-                    return new TaskSimpleResponse(id, projectMemberId, name, mileStone, tagList);
-                })
-                .toList();
-
-        List<ProjectMemberResponse> memberDtos = projectEntity.getProjectMemberList().stream()
-                .map(projectMemberEntity -> {
-                    return new ProjectMemberResponse(
-                            projectMemberEntity.getId(),
-                            projectMemberEntity.getUserId(),
-                            projectMemberEntity.getRole().name(),
-                            projectMemberEntity.getIsDeleted());
-                })
-                .toList();
-
-        List<TagResponse> tagDtos = projectEntity.getTagList().stream()
-                .map(tag -> new TagResponse(tag.getId(), tag.getName()))
-                .toList();
-
-
-        return new ProjectDetailResponse(projectEntity.getId(),
-                projectEntity.getName(),
-                projectEntity.getState().name(),
-                projectEntity.getCreatedAt(),
-                tagDtos,
-                milestoneDtos,
-                taskDtos,
-                memberDtos);
+        return ProjectDetailResponse.from(projectEntity);
     }
 
     //re-checked
     @Transactional
     @Override
     public void updateProject(Long requestingUserId, Long projectId, ProjectUpdateRequest projectUpdateRequest){
-        //기존 프로젝트 find
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-                )
-        );
+        //프로젝트 존재 여부 검증 후 find
+        ProjectEntity projectEntity = businessRuleValidator.findProjectOrThrow(projectId);
+        //요청자의 프로젝트 관리자 권한 확인
+        businessRuleValidator.validateProjectAdmin(requestingUserId, projectId);
 
-        //요청자의 관리자 권한 확인
-        if(!projectMemberRepository.existsByProject_IdAndUserIdAndRole(projectId, requestingUserId, ProjectMemberRole.ADMIN)){
-            throw new NoPermissionException(
-                    String.format("id:%s user has no admin permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
-
-        //프로젝트 update
         String status = projectUpdateRequest.state();
         ProjectState projectState = ProjectState.valueOf(status);
-        // 변경 감지로 인해 update
         projectEntity.updateNameAndState(projectUpdateRequest.name(), projectState);
-        // 그러나 명시적으로 변경
+
         projectRepository.save(projectEntity);
     }
 
@@ -170,19 +95,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteProject(Long requestingUserId, Long projectId){
         //프로젝트 존재 여부 확인
-        if(!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(
-                    String.format("id:%s project not found", projectId)
-            );
-        }
-
+        businessRuleValidator.validateProjectExists(projectId);
         //요청 자가 해당 프로젝트의 관리자 인지 확인
-        if(!projectMemberRepository.existsByProject_IdAndUserIdAndRole(projectId, requestingUserId, ProjectMemberRole.ADMIN)){
-            throw new NoPermissionException(
-                    String.format("id:%s user has no admin permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
+        businessRuleValidator.validateProjectAdmin(requestingUserId,projectId);
 
         projectRepository.deleteById(projectId);
     }

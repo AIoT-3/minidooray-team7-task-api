@@ -10,12 +10,12 @@ public record MileStoneSimpleResponse(
         LocalDateTime startDate,
         LocalDateTime endDate
 ) {
-    public static MileStoneSimpleResponse from(MilestoneEntity entity) {
+    public static MileStoneSimpleResponse from(MilestoneEntity milestoneEntity) {
         return new MileStoneSimpleResponse(
-                entity.getId(),
-                entity.getName(),
-                entity.getStartDate(),
-                entity.getEndDate()
+                milestoneEntity.getId(),
+                milestoneEntity.getName(),
+                milestoneEntity.getStartDate(),
+                milestoneEntity.getEndDate()
         );
     }
 }

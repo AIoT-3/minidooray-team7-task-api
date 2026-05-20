@@ -2,6 +2,7 @@ package com.nhnacademy.task.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.nhnacademy.task.dto.req.MileStoneCreateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -84,5 +85,15 @@ public class MilestoneEntity {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    public static MilestoneEntity create(MileStoneCreateRequest createRequest,
+                                         ProjectEntity projectEntity){
+        return new MilestoneEntity(
+                createRequest.name(),
+                projectEntity,
+                createRequest.startDate(),
+                createRequest.endDate()
+        );
     }
 }

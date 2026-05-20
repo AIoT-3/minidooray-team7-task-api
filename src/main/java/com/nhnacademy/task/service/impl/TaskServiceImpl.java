@@ -3,6 +3,7 @@ package com.nhnacademy.task.service.impl;
 import com.nhnacademy.task.common.exception.EntityNotFoundException;
 import com.nhnacademy.task.common.exception.InvalidRequestException;
 import com.nhnacademy.task.common.exception.NoPermissionException;
+import com.nhnacademy.task.common.validator.BusinessRuleValidator;
 import com.nhnacademy.task.dto.req.TaskCreateRequest;
 import com.nhnacademy.task.dto.req.TaskMileStoneCreateRequest;
 import com.nhnacademy.task.dto.req.TaskUpdateRequest;
@@ -28,26 +29,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
-    private final ProjectRepository projectRepository;
-    private final ProjectMemberRepository projectMemberRepository;
-    private final MilestoneRepository milestoneRepository;
+
+    private final BusinessRuleValidator businessRuleValidator;
 
     //re-checked
     @Transactional
     @Override
     public void createTask(Long requestingUserId, Long projectId, TaskCreateRequest taskCreateRequest){
-        ProjectEntity projectEntity = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-        ));
+        // 프로젝트 존재 여부 검증 후 find
+        ProjectEntity projectEntity
+                = businessRuleValidator.findProjectOrThrow(projectId);
+        // 프로젝트 멤버 권한 검증
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 프로젝트 멤버 존재 여부 검증 후 find
+        ProjectMemberEntity projectMemberEntity
+                = businessRuleValidator.findProjectMemberOrThrow(projectId, requestingUserId);
 
-        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, requestingUserId)
-                .orElseThrow(() -> new NoPermissionException(
-                        String.format("id:%s user has no user permission for id:%s project",
-                                requestingUserId, projectId)
-                ));
+        TaskEntity taskEntity = TaskEntity.create(
+                taskCreateRequest,
+                projectEntity,
+                projectMemberEntity);
 
-        TaskEntity taskEntity = new TaskEntity(taskCreateRequest.name(), projectEntity, projectMemberEntity, taskCreateRequest.content());
         projectEntity.addTask(taskEntity);
         projectMemberEntity.addTask(taskEntity);
         taskRepository.save(taskEntity);
@@ -57,172 +59,63 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     @Override
     public TaskSimpleResponse getTaskSimpleInfoById(Long requestingUserId, Long projectId, Long taskId) {
-        if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(
-                    String.format("id:%s project not found", projectId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 태스크 존재 여부 검증 후 find
+        TaskEntity taskEntity = businessRuleValidator.findTaskOrThrow(taskId);
+        // 태스크가 프로젝트에 속하는지 검증
+        businessRuleValidator.validateTaskBelongsToProject(projectId, taskId);
 
-        if (!projectMemberRepository.existsByUserIdAndProject_Id(requestingUserId, projectId)) {
-            throw new NoPermissionException(
-                    String.format("id:%s user has no user permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
-
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s task not found", taskId)
-        ));
-
-        if (!taskEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
-            );
-        }
-
-        return new TaskSimpleResponse(
-                taskEntity.getId(),
-                taskEntity.getProjectMember().getId(),
-                taskEntity.getName(),
-                taskEntity.getMilestone() != null ?
-                        MileStoneSimpleResponse.from(taskEntity.getMilestone()) : null,
-                taskEntity.getTaskTagList() != null ?
-                        taskEntity.getTaskTagList().stream().map(taskTagEntity -> {
-                            return new TagResponse(taskTagEntity.getTag().getId(), taskTagEntity.getTag().getName());
-                        }).toList() : new ArrayList<>()
-        );
+        return TaskSimpleResponse.from(taskEntity);
     }
 
     //re-checked
     @Transactional(readOnly = true)
     @Override
     public TaskDetailResponse getTaskDetailInfoById(Long requestingUserId, Long projectId, Long taskId){
-        if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(
-                    String.format("id:%s project not found", projectId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 태스크 존재 여부 검증 후 find
+        TaskEntity taskEntity = businessRuleValidator.findTaskOrThrow(taskId);
+        // 태스크가 프로젝트에 속하는지 검증
+        businessRuleValidator.validateTaskBelongsToProject(projectId, taskId);
 
-        if (!projectMemberRepository.existsByUserIdAndProject_Id(requestingUserId, projectId)) {
-            throw new NoPermissionException(
-                    String.format("id:%s user has no user permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
-
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("id:%s task not found", taskId)
-        ));
-
-        if (!taskEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
-            );
-        }
-
-        return new TaskDetailResponse(
-                taskEntity.getId(),
-                taskEntity.getProject().getId(),
-                taskEntity.getProjectMember().getId(),
-                taskEntity.getMilestone() != null ? new MileStoneDetailResponse(
-                        taskEntity.getMilestone().getId(),
-                        taskEntity.getMilestone().getName(),
-                        taskEntity.getMilestone().getStartDate(),
-                        taskEntity.getMilestone().getEndDate(),
-                        taskEntity.getMilestone().getCreatedAt()
-                ) : null,
-                taskEntity.getName(),
-                taskEntity.getContent(),
-                taskEntity.getCreatedAt(),
-                taskEntity.getTaskTagList() != null ?
-                        taskEntity.getTaskTagList().stream().map(taskTagEntity -> {
-                            return new TagResponse(taskTagEntity.getTag().getId(), taskTagEntity.getTag().getName());
-                        }).toList() : new ArrayList<>(),
-                taskEntity.getCommentList() != null ?
-                        taskEntity.getCommentList().stream().map(commentEntity -> {
-                            return new CommentResponse(
-                                    commentEntity.getId(),
-                                    commentEntity.getProjectMember().getId(),
-                                    commentEntity.getContent(),
-                                    commentEntity.getCreatedAt(),
-                                    commentEntity.getUpdatedAt()
-                            );
-                        }).toList() : new ArrayList<>()
-        );
+        return TaskDetailResponse.from(taskEntity);
     }
 
     //re-checked
     @Transactional(readOnly = true)
     @Override
     public List<TaskSimpleResponse> getTasksByProjectID(Long requestingUserId, Long projectId){
-        if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(
-                    String.format("id:%s project not found", projectId)
-            );
-        }
-
-        if (!projectMemberRepository.existsByUserIdAndProject_Id(requestingUserId, projectId)) {
-            throw new NoPermissionException(
-                    String.format("id:%s user has no user permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
 
         List<TaskEntity> allByProjectId = taskRepository.findAllByProject_Id(projectId);
-        if(allByProjectId != null){
-            List<TaskSimpleResponse> taskSimpleResponses = new ArrayList<>();
-            for (TaskEntity taskEntity : allByProjectId) {
-                taskSimpleResponses.add(
-                        new TaskSimpleResponse(
-                                taskEntity.getId(),
-                                taskEntity.getProjectMember().getId(),
-                                taskEntity.getName(),
-                                taskEntity.getMilestone() != null ?
-                                        MileStoneSimpleResponse.from(taskEntity.getMilestone()) : null,
-                                taskEntity.getTaskTagList() != null ?
-                                        taskEntity.getTaskTagList().stream().map(taskTagEntity -> {
-                                            return new TagResponse(
-                                                    taskTagEntity.getTag().getId(),
-                                                    taskTagEntity.getTag().getName()
-                                            );
-                                        }).toList() : new ArrayList<>()
-                        )
-                );
-            }
-            return taskSimpleResponses;
-        }
-        return new ArrayList<>();
+
+        return allByProjectId != null ?
+                allByProjectId.stream().map(
+                        TaskSimpleResponse::from
+                ).toList() : new ArrayList<>();
     }
 
     //re-checked
     @Transactional
     @Override
     public void updateTask(Long requestingUserId, Long projectId, Long taskId, TaskUpdateRequest taskUpdateRequest){
-        if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(
-                    String.format("id:%s project not found", projectId)
-            );
-        }
-
-        if (!projectMemberRepository.existsByUserIdAndProject_Id(requestingUserId, projectId)) {
-            throw new NoPermissionException(
-                    String.format("id:%s user has no user permission for id:%s project",
-                            requestingUserId, projectId)
-            );
-        }
-
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s task not found", taskId)
-                )
-        );
-
-        if (!taskEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 태스크 존재 여부 검증 후 find
+        TaskEntity taskEntity = businessRuleValidator.findTaskOrThrow(taskId);
+        // 태스크가 프로젝트에 속하는지 검증
+        businessRuleValidator.validateTaskBelongsToProject(projectId, taskId);
 
         taskEntity.updateNameAndContent(taskUpdateRequest.name(), taskUpdateRequest.content());
         taskRepository.save(taskEntity);
@@ -231,40 +124,18 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public void addMilestoneToTask(Long requestingUserId, Long projectId, Long taskId, TaskMileStoneCreateRequest mileStoneCreateRequest){
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-                ));
-
-        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, requestingUserId).orElseThrow(
-                () -> new NoPermissionException(
-                        String.format("id:%s user has no user permission for id:%s project",
-                                requestingUserId, projectId)
-                ));
-
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s task not found", taskId)
-                )
-        );
-
-        if (!taskEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
-            );
-        }
-
-        MilestoneEntity milestoneEntity = milestoneRepository.findById(mileStoneCreateRequest.mileStoneId()).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s milestone not found", mileStoneCreateRequest.mileStoneId())
-                )
-        );
-
-        if (!milestoneEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s milestone does not belong to id:%s project", mileStoneCreateRequest.mileStoneId(), projectId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 태스크 존재 여부 검증 후 find
+        TaskEntity taskEntity = businessRuleValidator.findTaskOrThrow(taskId);
+        // 태스크가 프로젝트에 속하는지 검증
+        businessRuleValidator.validateTaskBelongsToProject(projectId, taskId);
+        // 마일스톤 존재 여부 검증 후 find
+        MilestoneEntity milestoneEntity = businessRuleValidator.findMilestoneOrThrow(mileStoneCreateRequest.mileStoneId());
+        // 마일스톤이 프로젝트에 속하는지 검증
+        businessRuleValidator.validateMilestoneBelongsToProject(projectId, milestoneEntity.getId());
 
         taskEntity.setMilestone(milestoneEntity);
         taskRepository.save(taskEntity);
@@ -273,47 +144,20 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public void removeMilestoneOnTask(Long requestingUserId, Long projectId, Long taskId, Long milestoneId){
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-                ));
-
-        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, requestingUserId).orElseThrow(
-                () -> new NoPermissionException(
-                        String.format("id:%s user has no user permission for id:%s project",
-                                requestingUserId, projectId)
-                ));
-
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s task not found", taskId)
-                )
-        );
-
-        if (!taskEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
-            );
-        }
-
-        MilestoneEntity milestoneEntity = milestoneRepository.findById(milestoneId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s milestone not found", milestoneId)
-                )
-        );
-
-        if(!milestoneEntity.getProject().getId().equals(projectId)){
-            throw new InvalidRequestException(
-                    String.format("id:%s milestone does not belong to id:%s project", milestoneId, projectId)
-            );
-        }
-
-        if(taskEntity.getMilestone() == null || !taskEntity.getMilestone().getId().equals(milestoneId)){
-            throw new InvalidRequestException(
-                    String.format("id:%s milestone does not belong to id:%s task",
-                            milestoneId, taskId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 태스크 존재 여부 검증 후 find
+        TaskEntity taskEntity = businessRuleValidator.findTaskOrThrow(taskId);
+        // 태스크가 프로젝트에 속하는지 검증
+        businessRuleValidator.validateTaskBelongsToProject(projectId, taskId);
+        // 마일스톤 존재 여부 검증 후 find
+        MilestoneEntity milestoneEntity = businessRuleValidator.findMilestoneOrThrow(milestoneId);
+        // 마일스톤이 프로젝트에 속하는지 검증
+        businessRuleValidator.validateMilestoneBelongsToProject(projectId, milestoneEntity.getId());
+        // 마일스톤이 태스크에 속하는지 검증
+        businessRuleValidator.validateMilestoneBelongsToTask(taskId, milestoneId);
 
         taskEntity.setMilestone(null);
         taskRepository.save(taskEntity);
@@ -323,28 +167,14 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public void deleteTask(Long requestingUserId, Long projectId, Long taskId){
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s project not found", projectId)
-                ));
-
-        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, requestingUserId).orElseThrow(
-                () -> new NoPermissionException(
-                        String.format("id:%s user has no user permission for id:%s project",
-                                requestingUserId, projectId)
-                ));
-
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        String.format("id:%s task not found", taskId)
-                )
-        );
-
-        if (!taskEntity.getProject().getId().equals(projectId)) {
-            throw new InvalidRequestException(
-                    String.format("id:%s task does not belong to id:%s project", taskId, projectId)
-            );
-        }
+        // 프로젝트 존재 여부 검증
+        businessRuleValidator.validateProjectExists(projectId);
+        // 요청자가 프로젝트 멤버 인지 체크
+        businessRuleValidator.validateProjectMembership(requestingUserId, projectId);
+        // 태스크 존재 여부 검증 후 find
+        TaskEntity taskEntity = businessRuleValidator.findTaskOrThrow(taskId);
+        // 태스크가 프로젝트에 속하는지 검증
+        businessRuleValidator.validateTaskBelongsToProject(projectId, taskId);
 
         taskEntity.setProject(null);
         taskEntity.setProjectMember(null);
