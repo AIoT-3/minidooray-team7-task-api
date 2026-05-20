@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface MilestoneRepository extends JpaRepository<MilestoneEntity, Long> {
     List<MilestoneEntity> findAllByProject_Id(Long projectId);
+
+    boolean existsByProject_IdAndId(Long projectId, Long id);
 }

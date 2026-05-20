@@ -2,6 +2,7 @@ package com.nhnacademy.task.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.nhnacademy.task.dto.req.TaskCreateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -130,5 +131,14 @@ public class TaskEntity {
     public void updateNameAndContent(String name, String content){
         this.name = name;
         this.content = content;
+    }
+
+    public static TaskEntity create(TaskCreateRequest request, ProjectEntity project, ProjectMemberEntity member) {
+        return new TaskEntity(
+                request.name(),
+                project,
+                member,
+                request.content()
+        );
     }
 }

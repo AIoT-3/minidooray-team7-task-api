@@ -18,4 +18,8 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMemberEnti
     boolean existsByProject_IdAndUserIdAndRole(Long projectEntityId, Long userId, ProjectMemberRole role);
 
     List<ProjectMemberEntity> findAllByProject_Id(Long projectId);
+
+    boolean existsByIdAndProject_Id(Long id, Long projectId);
+
+    boolean existsByIdAndProject_IdAndRole(Long id, Long projectId, ProjectMemberRole role);
 }

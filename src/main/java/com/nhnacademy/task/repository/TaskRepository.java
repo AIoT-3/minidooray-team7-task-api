@@ -12,4 +12,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
     List<TaskEntity> findAllByProject_Id(Long projectId);
 
     boolean existsByProject_IdAndId(Long projectId, Long id);
+
+    boolean existsByMilestone_IdAndId(Long milestoneId, Long id);
 }

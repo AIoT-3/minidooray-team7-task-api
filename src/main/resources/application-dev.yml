@@ -13,3 +13,7 @@ logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
     org.springframework.transaction.interceptor: trace
+
+services:
+  account-api:
+    url: http://localhost:8081
