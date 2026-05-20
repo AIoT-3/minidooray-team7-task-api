@@ -27,8 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MilestoneServiceImpl implements MilestoneService {
     private final MilestoneRepository milestoneRepository;
-    private final ProjectRepository projectRepository;
-    private final ProjectMemberRepository projectMemberRepository;
 
     private final BusinessRuleValidator businessRuleValidator;
 
