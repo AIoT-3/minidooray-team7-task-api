@@ -1,5 +1,7 @@
 package com.nhnacademy.task.controller;
 
+import com.nhnacademy.task.dto.req.TagCreateRequest;
+import com.nhnacademy.task.dto.req.TagUpdateRequest;
 import com.nhnacademy.task.dto.resp.TagResponse;
 import com.nhnacademy.task.service.TagService;
 import org.junit.jupiter.api.DisplayName;
@@ -51,10 +53,10 @@ class TagControllerTest {
                 .thenReturn(List.of(response));
 
         mockMvc.perform(get("/projects/{project-id}/tags", projectId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("100"))
-                .andExpect(jsonPath("$.name").value("태그1"));
+                .andExpect(jsonPath("$[0].id").value(100))
+                .andExpect(jsonPath("$[0].name").value("태그1"));
 
         then(tagService).should().getTagsByProjectId(projectId);
     }
@@ -71,7 +73,73 @@ class TagControllerTest {
         );
 
         when(tagService.createTag(projectId, name))
-                .thenReturn(response)
+                .thenReturn(response);
+
+        TagCreateRequest request = new TagCreateRequest(name);
+
+        mockMvc.perform(
+                    post("/projects/{project-id}/tags", projectId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .accept(MediaType.APPLICATION_JSON)
+                    )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(100))
+                .andExpect(jsonPath("$.name").value(name));
+
+        then(tagService).should().createTag(projectId, name);
+    }
+
+    @Test
+    @DisplayName("태그 수정")
+    void updateTag() throws Exception {
+        Long projectId = 1L;
+        Long tagId = 10L;
+        String name = "테스트1";
+        TagUpdateRequest request = new TagUpdateRequest(name);
+
+        TagResponse response = new TagResponse(
+                tagId,
+                name
+        );
+
+        when(tagService.updateTag(projectId, tagId, name))
+                .thenReturn(response);
+
+        mockMvc.perform(put("/projects/{project-id}/tags/{tag-id}", projectId, tagId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .accept(MediaType.APPLICATION_JSON)
+                        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(tagId))
+                .andExpect(jsonPath("$.name").value(name));
+
+        then(tagService).should().updateTag(projectId, tagId, request.name());
+
+    }
+
+    @Test
+    @DisplayName("태그 삭제")
+    void deleteTag() throws Exception {
+        Long projectId = 1L;
+        Long tagId = 10L;
+
+        mockMvc.perform(delete("/projects/{project-id}/tags/{tag-id}", projectId, tagId))
+                .andExpect(status().isNoContent());
+
+        then(tagService).should().deleteTag(projectId, tagId);
+    }
+
+    @Test
+    void createTag_invalidBlankName() throws Exception {
+        Long projectId = 1L;
+        TagCreateRequest request = new TagCreateRequest("");
+
+        mockMvc.perform(post("/projects/{project-id}/tags", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
 
     }
 }

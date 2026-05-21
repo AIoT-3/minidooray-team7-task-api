@@ -160,4 +160,54 @@ class CommentControllerTest {
                 .deleteComment(projectId, taskId, commentId, projectMemberId);
 
     }
+
+    @Test
+    @DisplayName("댓글 생성 실패 - 내용 비어 있음")
+    void createComment_invalidBlankContent() throws Exception {
+        Long projectId = 1L;
+        Long taskId = 10L;
+        Long projectMemberId = 5L;
+
+        CommentCreateRequest request = new CommentCreateRequest("");
+
+        mockMvc.perform(post("/projects/{project-id}/tasks/{task-id}/comments", projectId, taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-USER-ID", projectMemberId)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 실패 - X-USER-ID 헤더 없음")
+    void deleteComment_missingUserIdHeader() throws Exception {
+        Long projectId = 1L;
+        Long taskId = 10L;
+        Long commentId = 100L;
+
+        mockMvc.perform(
+                        delete("/projects/{project-id}/tasks/{task-id}/comments/{comment-id}",
+                                projectId, taskId, commentId)
+                        )
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("댓글 생성 실패 - 45자 초과")
+    void createComment_exceedCharacterLimit() throws Exception {
+        Long projectId = 1L;
+        Long taskId = 10L;
+        Long projectMemberId = 5L;
+
+        CommentCreateRequest request = new CommentCreateRequest(
+                "sssssssdssssádwadfssssádwadfssssádwadfssssádwadfssssádwadfssssádwadfssssádwadf"
+        );
+
+        mockMvc.perform(post("/projects/{project-id}/tasks/{task-id}/comments", projectId, taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-USER-ID", projectMemberId)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+
 }
