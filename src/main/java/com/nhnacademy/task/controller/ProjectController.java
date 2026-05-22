@@ -2,6 +2,7 @@ package com.nhnacademy.task.controller;
 
 import com.nhnacademy.task.dto.req.ProjectCreateRequest;
 import com.nhnacademy.task.dto.req.ProjectUpdateRequest;
+import com.nhnacademy.task.dto.resp.ProjectDetailResponse;
 import com.nhnacademy.task.dto.resp.ProjectSimpleResponse;
 import com.nhnacademy.task.service.ProjectService;
 import jakarta.validation.Valid;
@@ -33,6 +34,16 @@ public class ProjectController {
     ){
         List<ProjectSimpleResponse> projectsByUserId = projectService.getProjectsByUserId(requestingUserId);
         return ResponseEntity.ok(projectsByUserId);
+    }
+
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectDetailResponse> getProject(
+            @PathVariable long projectId,
+            @RequestHeader("X-USER-ID") Long requestingUserId
+    ) {
+        ProjectDetailResponse response = projectService.getProjectDetailInfoById(requestingUserId, projectId);
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{projectId}")

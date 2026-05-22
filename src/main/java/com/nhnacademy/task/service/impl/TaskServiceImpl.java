@@ -86,8 +86,7 @@ public class TaskServiceImpl implements TaskService {
                 taskEntity.getProjectMember().getId(),
                 taskEntity.getName(),
                 taskEntity.getMilestone() != null ?
-                        new MileStoneSimpleResponse(taskEntity.getMilestone().getId(),
-                                taskEntity.getMilestone().getName()) : null,
+                        MileStoneSimpleResponse.from(taskEntity.getMilestone()) : null,
                 taskEntity.getTaskTagList() != null ?
                         taskEntity.getTaskTagList().stream().map(taskTagEntity -> {
                             return new TagResponse(taskTagEntity.getTag().getId(), taskTagEntity.getTag().getName());
@@ -180,7 +179,7 @@ public class TaskServiceImpl implements TaskService {
                                 taskEntity.getProjectMember().getId(),
                                 taskEntity.getName(),
                                 taskEntity.getMilestone() != null ?
-                                        new MileStoneSimpleResponse(taskEntity.getMilestone().getId(), taskEntity.getMilestone().getName()) : null,
+                                        MileStoneSimpleResponse.from(taskEntity.getMilestone()) : null,
                                 taskEntity.getTaskTagList() != null ?
                                         taskEntity.getTaskTagList().stream().map(taskTagEntity -> {
                                             return new TagResponse(
