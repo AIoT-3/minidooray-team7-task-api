@@ -37,7 +37,7 @@ public class ProjectMemberEntity {
     private Long userId;
 
     @NotNull
-    @Column(name = "role")
+    @Column(name = "role", length = 10)
     @Enumerated(EnumType.STRING)
     private ProjectMemberRole role;
 
@@ -85,6 +85,8 @@ public class ProjectMemberEntity {
     public void removeTask(TaskEntity task) {
         task.setProjectMember(null);
     }
+
+
 
     public void addComment(CommentEntity comment) {
         comment.setProjectMember(this);

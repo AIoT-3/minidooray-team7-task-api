@@ -1,8 +1,10 @@
 package com.nhnacademy.task.common.validator;
 
 import com.nhnacademy.task.common.exception.EntityNotFoundException;
+import com.nhnacademy.task.common.exception.ExternalApiException;
 import com.nhnacademy.task.common.exception.InvalidRequestException;
 import com.nhnacademy.task.common.exception.NoPermissionException;
+import com.nhnacademy.task.dto.resp.UserResponse;
 import com.nhnacademy.task.entity.*;
 import com.nhnacademy.task.repository.MilestoneRepository;
 import com.nhnacademy.task.repository.ProjectMemberRepository;
@@ -11,6 +13,7 @@ import com.nhnacademy.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +25,25 @@ public class BusinessRuleValidator {
     private final ProjectMemberRepository projectMemberRepository;
     private final TaskRepository taskRepository;
     private final MilestoneRepository milestoneRepository;
+
+    private final RestClient restClient;
+
+    public UserResponse findUserOrExists(Long userId) {
+        return restClient.get()
+                .uri("/users/pk/{userId}", userId)
+                .exchange((request, response) -> {
+                    if (response.getStatusCode().value() == 404) {
+                        throw new EntityNotFoundException(
+                                String.format("id:%s user not found", userId)
+                        );
+                    } else if (response.getStatusCode().isError()) {
+                        throw new ExternalApiException(
+                                "account-api error: " + response.bodyTo(String.class)
+                        );
+                    }
+                    return response.bodyTo(UserResponse.class);
+                });
+    }
 
     public ProjectEntity findProjectOrThrow(Long projectId){
         return projectRepository.findById(projectId).orElseThrow(
@@ -140,10 +162,4 @@ public class BusinessRuleValidator {
             );
         }
     }
-
-
-
-
-
-
 }

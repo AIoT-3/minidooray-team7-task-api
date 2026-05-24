@@ -11,7 +11,7 @@ import java.util.List;
  * @since 26. 5. 18.
  */
 public interface CommentService {
-    CommentResponse createComment(Long taskId, Long projectMemberId, String content);
+    CommentResponse createComment(Long projectId, Long taskId, Long projectMemberId, String content);
 
     List<CommentResponse> getComments(Long projectId, Long taskId);
 

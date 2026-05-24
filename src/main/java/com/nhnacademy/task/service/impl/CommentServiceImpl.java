@@ -32,11 +32,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public CommentResponse createComment(Long taskId, Long projectMemberId, String content) {
+    public CommentResponse createComment(Long projectId, Long taskId, Long projectMemberId, String content) {
 
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
-        ProjectMemberEntity projectMember = projectMemberRepository.findById(projectMemberId)
+        ProjectMemberEntity projectMember = projectMemberRepository.findByProject_IdAndUserId(projectId, projectMemberId)
                 .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
 
 
@@ -89,8 +89,10 @@ public class CommentServiceImpl implements CommentService {
         if (!projectId.equals(comment.getTask().getProject().getId())) {
             throw new EntityNotFoundException("Task not found");
         }
+        ProjectMemberEntity projectMemberEntity = projectMemberRepository.findByProject_IdAndUserId(projectId, projectMemberId)
+                .orElseThrow(() -> new NoPermissionException("이 댓글을 삭제할 권한이 없습니다."));
 
-        if (!projectMemberId.equals(comment.getProjectMember().getId())) {
+        if (!projectMemberEntity.getId().equals(comment.getProjectMember().getId())) {
             throw new NoPermissionException("이 댓글을 삭제할 권한이 없습니다.");
         }
 
