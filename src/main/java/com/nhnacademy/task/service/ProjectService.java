@@ -4,8 +4,7 @@ import com.nhnacademy.task.dto.req.ProjectCreateRequest;
 import com.nhnacademy.task.dto.resp.ProjectDetailResponse;
 import com.nhnacademy.task.dto.resp.ProjectSimpleResponse;
 import com.nhnacademy.task.dto.req.ProjectUpdateRequest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 

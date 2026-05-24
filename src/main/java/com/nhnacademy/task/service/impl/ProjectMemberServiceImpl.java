@@ -1,13 +1,7 @@
 package com.nhnacademy.task.service.impl;
 
-import com.nhnacademy.task.common.exception.EntityNotFoundException;
-import com.nhnacademy.task.common.exception.ExternalApiException;
-import com.nhnacademy.task.common.exception.InvalidRequestException;
-import com.nhnacademy.task.common.exception.NoPermissionException;
 import com.nhnacademy.task.common.validator.BusinessRuleValidator;
-import com.nhnacademy.task.dto.resp.UserResponse;
 import com.nhnacademy.task.entity.ProjectEntity;
-import com.nhnacademy.task.repository.ProjectRepository;
 import com.nhnacademy.task.entity.ProjectMemberEntity;
 import com.nhnacademy.task.entity.ProjectMemberRole;
 import com.nhnacademy.task.dto.req.ProjectMemberCreateRequest;
@@ -15,14 +9,10 @@ import com.nhnacademy.task.dto.resp.ProjectMemberResponse;
 import com.nhnacademy.task.repository.ProjectMemberRepository;
 import com.nhnacademy.task.service.ProjectMemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -32,10 +22,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     private final BusinessRuleValidator businessRuleValidator;
 
-//    private final RestClient restClient;
-
-    //TODO client 검증...
-
     //re-checked
     @Transactional
     @Override
@@ -44,34 +30,13 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         ProjectEntity projectEntity = businessRuleValidator.findProjectOrThrow(projectId);
         // 요청자가 프로젝트의 관리자 인지 체크
         businessRuleValidator.validateProjectAdmin(requestingUserId, projectId);
-
-//        // 프로젝트 멤버로 추가 하려는 이가 유저 인지 검증
-//        ResponseEntity<UserResponse> responseEntity = restClient.get()
-//                .uri("/users/{user-id}", projectMemberCreateRequest.userId())
-//                .retrieve()
-//                .toEntity(UserResponse.class);
-//
-//        //user 확인
-//        restClient.get()
-//                .uri("/users/{userId}", Map.of("userId", projectMemberCreateRequest.userId()))
-//                .exchange((request, response) -> {
-//                    if (response.getStatusCode().value() == 404) {
-//                        String errorBody = response.bodyTo(String.class);
-//                        throw new EntityNotFoundException(
-//                                String.format("id:%s user not found", projectMemberCreateRequest.userId())
-//                        );
-//                    } else if (response.getStatusCode().isError()) {
-//                        String errorBody = response.bodyTo(String.class);
-//                        throw new ExternalApiException("account-api error: " + errorBody);
-//                    }
-//
-//                    return response.bodyTo(UserResponse.class);
-//                });
+        // 존재하는 유저인지 account-api를 통해 검증
+        businessRuleValidator.findUserOrExists(projectMemberCreateRequest.userId());
 
         //이미 프로젝트 멤버로 등록되어 있는 유저 인지 확인 하기 위해 find
         Optional<ProjectMemberEntity> byProjectIdAndUserId = projectMemberRepository.findByProject_IdAndUserId(projectId, projectMemberCreateRequest.userId());
         if(byProjectIdAndUserId.isEmpty()) { // 프로젝트 멤버로 등록되어 있지 않은 경우
-            ProjectMemberEntity projectMemberEntity = new ProjectMemberEntity(projectEntity, projectMemberCreateRequest.userId(), ProjectMemberRole.USER);
+            ProjectMemberEntity projectMemberEntity = new ProjectMemberEntity(projectEntity, projectMemberCreateRequest.userId(), ProjectMemberRole.MEMBER);
             projectEntity.addProjectMember(projectMemberEntity);
             projectMemberRepository.save(projectMemberEntity);
         }

@@ -38,7 +38,7 @@ public class CommentController {
             @RequestHeader("X-USER-ID") Long projectMemberId,
             @Valid @RequestBody CommentCreateRequest request
             ) {
-        return commentService.createComment(taskId, projectMemberId, request.content());
+        return commentService.createComment(projectId, taskId, projectMemberId, request.content());
     }
 
     @PutMapping("/{comment-id}")
